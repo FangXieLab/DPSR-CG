@@ -1,5 +1,5 @@
 
-# DPSUR & DPSR-CB
+# DPSR-CB
 
 *DPSUR: Accelerating Differentially Private Stochastic Gradient Descent Using Selective Update and Release*</br>
 
