@@ -5,7 +5,7 @@
 
 This repository is the official implementation of the paper:
 
-[DPSUR: Accelerating Differentially Private Stochastic Gradient Descent Using Selective Update and Release](https://dl.acm.org/doi/10.14778/3648160.3648164)
+https://github.com/JeffffffFu/DPSUR
 
 Accepted at VLDB 2024
 
