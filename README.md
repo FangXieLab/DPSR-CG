@@ -1,16 +1,19 @@
+这是为您更新后的 `README.md` 代码。我已经按照您的要求修正了头部信息，添加了关于 ICML 2026 和 DPSUR 致谢的内容，并整合了所有实验命令。
 
+```markdown
 # DPSR-CB
 
-*DPSUR: Accelerating Differentially Private Stochastic Gradient Descent Using Selective Update and Release*</br>
+*DPSR-CB: Differentially Private SGD with Selective Release Based On Clipping Bias*
 
 This repository is the official implementation of the paper:
 
-https://github.com/JeffffffFu/DPSUR
+**DPSR-CB: Differentially Private SGD with Selective Release Based On Clipping Bias**
 
-Accepted at VLDB 2024
+*Under review at ICML 2026*
 
-## Citations
-The details of this pipeline are described in the following paper. If you use this code in your work, please kindly cite it. Thanks.
+## Acknowledgements & Base Work
+This codebase is built upon the official implementation of DPSUR (VLDB 2024). We express our gratitude to the authors for open-sourcing their code. If you find this repository useful, please consider citing both our work and the original DPSUR paper:
+
 ```bash
 @article{fu2024dpsur,
   title={DPSUR: Accelerating Differentially Private Stochastic Gradient Descent Using Selective Update and Release},
@@ -25,24 +28,11 @@ The details of this pipeline are described in the following paper. If you use th
 
 ```
 
-
-## Results
-
-This table presents the main results from our paper. For each dataset, we target the privacy budget `epsilon={1, 2, 3, 4}` and fixed `delta=1e-5`.
-For all experiments, we report the average test acc of `5` independent trials.
-
-| Dataset | epsilon=1 | epsilon=2 | epsilon=3 | epsilon=4 |
-| --- | --- | --- | --- | --- |
-| MNIST | 97.93% | 98.70% | 98.88% | 98.95% |
-| Fashion-MNIST | 88.38% | 89.34% | 89.71% | 90.18% |
-| CIFAR-10 | 64.41% | 69.40% | 70.83% | 71.45% |
-| IMDB | 66.50% | 71.02% | 72.16% | 74.14% |
-
 ## Execution Commands
 
-### 1. DPSR-CB (New)
+### 1. DPSR-CB (Proposed)
 
-The following commands run the DPSR-CB algorithm across different datasets. 
+The following commands run the DPSR-CB algorithm across different datasets.
 
 #### MNIST
 
@@ -62,8 +52,6 @@ python -u main.py --algorithm DPSR_CB --dataset_name FMNIST  --sigma_t 2.15 --lr
 
 ```
 
-
-
 #### CIFAR-10
 
 ```bash
@@ -71,8 +59,6 @@ python main.py --algorithm DPSR_CB --dataset_name CIFAR-10 --sigma_t 3.5 --lr 0.
 python main.py --algorithm DPSR_CB --dataset_name CIFAR-10 --sigma_t 3.5 --lr 0.1 --batch_size 2048 --C_t=1.0 --beta=2 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=3 --max_error=11 --eps=3.0
 
 ```
-
-
 
 #### IMDB
 
@@ -85,7 +71,7 @@ python -u main.py --algorithm DPSR_CB --dataset_name IMDB  --sigma_t 1.35 --lr 0
 
 ---
 
-### 2. DPSUR-GC (New)
+### 2. DPSUR-GC
 
 #### MNIST
 
@@ -96,8 +82,6 @@ python -u main.py --algorithm DPSUR_GC --dataset_name MNIST  --sigma_t 1.35 --lr
 
 ```
 
-
-
 #### IMDB
 
 ```bash
@@ -107,22 +91,18 @@ python -u main.py --algorithm DPSUR_GC --dataset_name IMDB  --sigma_t 1.35 --lr 
 
 ```
 
-
-
 ---
 
-### 3. DPIS-GC (DPIS_GA) (New)
+### 3. DPIS-GC 
 
 #### MNIST
 
 ```bash
-python -u main.py --algorithm DPIS_GA --dataset_name MNIST  --sigma_t 2.0 --lr 0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=8 --max_error=11 --eps=1.0
-python -u main.py --algorithm DPIS_GA --dataset_name MNIST  --sigma_t 1.5 --lr 0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=8 --max_error=11 --eps=2.0
-python -u main.py --algorithm DPIS_GA --dataset_name MNIST  --sigma_t 1.35 --lr 0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=8 --max_error=11 --eps=3.0
+python -u main.py --algorithm DPIS-GC --dataset_name MNIST  --sigma_t 2.0 --lr 0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=8 --max_error=11 --eps=1.0
+python -u main.py --algorithm DPIS-GC --dataset_name MNIST  --sigma_t 1.5 --lr 0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=8 --max_error=11 --eps=2.0
+python -u main.py --algorithm DPIS-GC --dataset_name MNIST  --sigma_t 1.35 --lr 0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=8 --max_error=11 --eps=3.0
 
 ```
-
-
 
 #### IMDB
 
@@ -133,11 +113,9 @@ python -u main.py --algorithm DPIS_GA --dataset_name IMDB  --sigma_t 1.35 --lr 0
 
 ```
 
-
-
 ---
 
-### 4. DPSUR (Original)
+### 4. DPSUR (Base Work)
 
 To reproduce the results for linear ScatterNet models with the original DPSUR algorithm:
 
@@ -185,13 +163,11 @@ python main.py --algorithm DPSUR --dataset_name IMDB  --sigma 1.23 --lr 0.02 --b
 
 ---
 
-## Comparison Algorithms
+## Comparison Algorithms (DPAGD)
 
 You can run other comparison algorithms by simply modifying the '--algorithm=[algorithm name]' parameter.
 
-### DPAGD
-
-#### MNIST
+### MNIST
 
 ```bash
 python main.py --algorithm DPAGD --dataset_name MNIST  --sigma_t 2.0 --lr 2.0 --batch_size 1024 --C_v=3.0 --sigma_v=1.5  --eps=1.0
@@ -201,7 +177,7 @@ python main.py --algorithm DPAGD --dataset_name MNIST  --sigma_t 1.35 --lr 2.0 -
 
 ```
 
-#### FMNIST
+### FMNIST
 
 ```bash
 python main.py --algorithm DPAGD --dataset_name FMNIST  --sigma_t 4.0 --lr 4.0  --batch_size 2048 --C_v=3.0 --sigma_v=2.0   --eps=1.0
@@ -211,7 +187,7 @@ python main.py --algorithm DPAGD --dataset_name FMNIST  --sigma_t 2.15 --lr 4.0 
 
 ```
 
-#### CIFAR-10
+### CIFAR-10
 
 ```bash
 python main.py --algorithm DPAGD --dataset_name CIFAR-10 --sigma_t 11.0 --lr 4.0 --batch_size 8192 --C_v=3.0 --sigma_v=15.0 --eps=1.0
@@ -221,7 +197,7 @@ python main.py --algorithm DPAGD --dataset_name CIFAR-10 --sigma_t 5.67 --lr 4.0
 
 ```
 
-#### IMDB
+### IMDB
 
 IMDB does not support ScatterNet models
 
