@@ -1,4 +1,3 @@
-```markdown
 # DPSR-CB
 
 *DPSR-CB: Differentially Private SGD with Selective Release Based On Clipping Bias*
