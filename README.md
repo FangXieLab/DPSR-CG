@@ -4,9 +4,9 @@
 
 This repository is the official implementation of the paper:
 
-**DPSR-CB: Differentially Private SGD with Selective Release Based On Clipping Bias**
+**Revisiting Privacy Amplification by Subsampling in Selective Release DPSGD**
 
-*Under review at ICML 2026*
+
 
 ## Acknowledgements & Base Work
 This codebase is built upon the official implementation of DPSUR (VLDB 2024). We express our gratitude to the authors for open-sourcing their code. If you find this repository useful, please consider citing both our work and the original DPSUR paper:
@@ -27,122 +27,89 @@ This codebase is built upon the official implementation of DPSUR (VLDB 2024). We
 
 ## Execution Commands
 
-### 1. DPSR-CB (Proposed)
+### 1. DPSR-CG (Proposed)
 
 The following commands run the DPSR-CB algorithm across different datasets.
 
 #### MNIST
 
 ```bash
-python -u main.py --algorithm DPSR_CB --dataset_name MNIST  --sigma_t 2.0 --lr 0.1 --batch_size 1024 --C_t=1 --beta=2.0 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=8 --max_error=11 --eps=1.0
-python -u main.py --algorithm DPSR_CB --dataset_name MNIST  --sigma_t 1.5 --lr 0.1 --batch_size 1024 --C_t=1 --beta=2.0 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=8 --max_error=11 --eps=2.0
-python -u main.py --algorithm DPSR_CB --dataset_name MNIST  --sigma_t 1.35 --lr 0.1 --batch_size 1024 --C_t=1 --beta=2.0 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=8 --max_error=11 --eps=3.0
+nohup python -u main.py --algorithm DPSR_CB --dataset_name MNIST  --sigma_t 2.5 --lr 0.1 --batch_size 1024 --C_t=1 --beta=3.0 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --soft_c=8 --max_error=11 --eps=1.0 > DPSR_CG_MNIST_eps1.log 2>&1 &
 
+nohup python -u main.py --algorithm DPSR_CB --dataset_name MNIST  --sigma_t 2.0 --lr 0.1 --batch_size 1024 --C_t=1 --beta=3.0 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --soft_c=8 --max_error=11 --eps=2.0 > DPSR_CG_MNIST_eps2.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSR_CB --dataset_name MNIST  --sigma_t 1.8 --lr 0.1 --batch_size 1024 --C_t=1 --beta=3.0 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --soft_c=8 --max_error=11 --eps=3.0 > DPSR_CG_MNIST_eps3.log 2>&1 &
 ```
 
 #### FMNIST
 
 ```bash
-python -u main.py --algorithm DPSR_CB --dataset_name FMNIST  --sigma_t 4.0 --lr 0.1 --batch_size 2048 --C_t=1 --beta=2 --input_norm=GroupNorm --num_groups=27 --use_scattering --s=8 --max_error=11 --eps=1.0
-python -u main.py --algorithm DPSR_CB --dataset_name FMNIST  --sigma_t 2.15 --lr 0.1 --batch_size 2048 --C_t=1 --beta=2 --input_norm=GroupNorm --num_groups=27 --use_scattering --s=8 --max_error=11 --eps=2.0
-python -u main.py --algorithm DPSR_CB --dataset_name FMNIST  --sigma_t 2.15 --lr 0.1 --batch_size 2048 --C_t=1 --beta=2 --input_norm=GroupNorm --num_groups=27 --use_scattering --s=8 --max_error=11 --eps=3.0
+nohup python -u main.py --algorithm DPSR_CG --dataset_name FMNIST  --sigma_t 4.0 --lr 0.1 --batch_size 2048 --C_t=1 --beta=3 --input_norm=GroupNorm --num_groups=27 --use_scattering --soft_c=6 --max_error=11 --eps=1.0 > DPSR_CG_FMNIST_eps1.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSR_CG --dataset_name FMNIST  --sigma_t 3.0 --lr 0.1 --batch_size 2048 --C_t=1 --beta=3 --input_norm=GroupNorm --num_groups=27 --use_scattering --soft_c=6 --max_error=11 --eps=2.0 > DPSR_CG_FMNIST_eps2.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSR_CG --dataset_name FMNIST  --sigma_t 2.15 --lr 0.1 --batch_size 2048 --C_t=1 --beta=3 --input_norm=GroupNorm --num_groups=27 --use_scattering --soft_c=6 --max_error=11 --eps=3.0 > DPSR_CG_FMNIST_eps3.log 2>&1 &
 
 ```
 
 #### CIFAR-10
 
 ```bash
-python main.py --algorithm DPSR_CB --dataset_name CIFAR-10 --sigma_t 3.5 --lr 0.1 --batch_size 2048 --C_t=1.0 --beta=2 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=3 --max_error=11 --eps=2.0
-python main.py --algorithm DPSR_CB --dataset_name CIFAR-10 --sigma_t 3.5 --lr 0.1 --batch_size 2048 --C_t=1.0 --beta=2 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=3 --max_error=11 --eps=3.0
+nohup python -u main.py --algorithm DPSR_CG --dataset_name CIFAR-10 --sigma_t 5.67 --lr 0.1 --batch_size 2048 --C_t=1.0 --beta=3 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --soft_c=3 --max_error=11 --eps=1.0 > DPSR_CG_CIFAR_eps1.log 2>&1 &
 
+nohup python -u main.py --algorithm DPSR_CG --dataset_name CIFAR-10 --sigma_t 3.5 --lr 0.1 --batch_size 2048 --C_t=1.0 --beta=3 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --soft_c=3 --max_error=11 --eps=2.0 > DPSR_CG_CIFAR_eps2.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSR_CG --dataset_name CIFAR-10 --sigma_t 3.5 --lr 0.1 --batch_size 2048 --C_t=1.0 --beta=3 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --soft_c=3 --max_error=11 --eps=3.0 > DPSR_CG_CIFAR_eps3.log 2>&1 &
 ```
 
 #### IMDB
 
 ```bash
-python -u main.py --algorithm DPSR_CB --dataset_name IMDB  --sigma_t 2.0 --lr 0.02  --batch_size 1024 --C_t=1.0 --beta=2 --s=1 --max_error=11 --eps=1.0
-python -u main.py --algorithm DPSR_CB --dataset_name IMDB  --sigma_t 1.8 --lr 0.02  --batch_size 1024 --C_t=1.0 --beta=2 --s=1 --max_error=11 --eps=2.0
-python -u main.py --algorithm DPSR_CB --dataset_name IMDB  --sigma_t 1.35 --lr 0.02 --batch_size 1024 --C_t=1.0 --beta=2 --s=1 --max_error=11 --eps=3.0
+nohup python -u main.py --algorithm DPSR_CG --dataset_name IMDB  --sigma_t 2.5 --lr 0.02  --batch_size 1024 --C_t=1.0 --beta=3 --soft_c=1 --max_error=11 --eps=1.0 > DPSR_CG_IMDB_eps1.log 2>&1 &
 
+nohup python -u main.py --algorithm DPSR_CG --dataset_name IMDB  --sigma_t 1.8 --lr 0.02  --batch_size 1024 --C_t=1.0 --beta=3 --soft_c=1 --max_error=11 --eps=2.0 > DPSR_CG_IMDB_eps2.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSR_CG --dataset_name IMDB  --sigma_t 1.5 --lr 0.02 --batch_size 1024 --C_t=1.0 --beta=3 --soft_c=1 --max_error=11 --eps=3.0 > DPSR_CG_IMDB_eps3.log 2>&1 &
 ```
 
----
 
-### 2. DPSUR-GC
+### DPSUR
+
 
 #### MNIST
 
 ```bash
-python -u main.py --algorithm DPSUR_GC --dataset_name MNIST  --sigma_t 2.0 --lr 0.1 --batch_size 1024 --C_t=1 --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=8 --max_error=11 --eps=1.0
-python -u main.py --algorithm DPSUR_GC --dataset_name MNIST  --sigma_t 1.5 --lr 0.1 --batch_size 1024 --C_t=1 --C_v=0.001 --sigma_v=1.0 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=8 --max_error=11 --eps=2.0
-python -u main.py --algorithm DPSUR_GC --dataset_name MNIST  --sigma_t 1.35 --lr 0.1 --batch_size 1024 --C_t=1 --C_v=0.001 --sigma_v=0.9 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=8 --max_error=11 --eps=3.0
+nohup python -u main.py --algorithm DPSUR --dataset_name MNIST  --sigma_t 2.0 --lr 2.0 --batch_size 1024  --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --eps=1.0 > DPSUR_MNIST_eps1.log 2>&1 &
 
+nohup python -u main.py --algorithm DPSUR --dataset_name MNIST  --sigma_t 1.5 --lr 2.0 --batch_size 1024  --C_v=0.001 --sigma_v=1.0 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --eps=2.0 > DPSUR_MNIST_eps2.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSUR --dataset_name MNIST  --sigma_t 1.35 --lr 2.0 --batch_size 1024 --C_v=0.001 --sigma_v=0.9 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --eps=3.0 > DPSUR_MNIST_eps3.log 2>&1 &
 ```
 
-#### IMDB
 
-```bash
-python -u main.py --algorithm DPSUR_GC --dataset_name IMDB  --sigma_t 2.5 --lr 0.02  --batch_size 1024 --C_t=1.0 --C_v=0.001 --sigma_v=1.4 --bs_valid=256 --beta=-1 --eps=1.0
-python -u main.py --algorithm DPSUR_GC --dataset_name IMDB  --sigma_t 1.8 --lr 0.02  --batch_size 1024 --C_t=1.0 --C_v=0.001 --sigma_v=1.2 --bs_valid=256 --beta=-1 --eps=2.0
-python -u main.py --algorithm DPSUR_GC --dataset_name IMDB  --sigma_t 1.35 --lr 0.02 --batch_size 1024 --C_t=1.0 --C_v=0.001 --sigma_v=1.0 --bs_valid=256 --beta=-1 --eps=3.0
 
-```
-
----
-
-### 3. DPIS-GC 
-
-#### MNIST
-
-```bash
-python -u main.py --algorithm DPIS-GC --dataset_name MNIST  --sigma_t 2.0 --lr 0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=8 --max_error=11 --eps=1.0
-python -u main.py --algorithm DPIS-GC --dataset_name MNIST  --sigma_t 1.5 --lr 0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=8 --max_error=11 --eps=2.0
-python -u main.py --algorithm DPIS-GC --dataset_name MNIST  --sigma_t 1.35 --lr 0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --s=8 --max_error=11 --eps=3.0
-
-```
-
-#### IMDB
-
-```bash
-python -u main.py --algorithm DPIS_GA --dataset_name IMDB  --sigma_t 2.5 --lr 0.02  --batch_size 1024 --C_t=1.0 --s=1 --max_error=11 --eps=1.0
-python -u main.py --algorithm DPIS_GA --dataset_name IMDB  --sigma_t 1.8 --lr 0.02  --batch_size 1024 --C_t=1.0 --s=1 --max_error=11 --eps=2.0
-python -u main.py --algorithm DPIS_GA --dataset_name IMDB  --sigma_t 1.35 --lr 0.02 --batch_size 1024 --C_t=1.0 --s=1 --max_error=11 --eps=3.0
-
-```
-
----
-
-### 4. DPSUR (Base Work)
-
-To reproduce the results for linear ScatterNet models with the original DPSUR algorithm:
-
-#### MNIST
-
-```bash
-python main.py --algorithm DPSUR --dataset_name MNIST  --sigma_t 2.0 --lr 2.0 --batch_size 1024  --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --eps=1.0
-python main.py --algorithm DPSUR --dataset_name MNIST  --sigma_t 1.5 --lr 2.0 --batch_size 1024  --C_v=0.001 --sigma_v=1.0 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --eps=2.0
-python main.py --algorithm DPSUR --dataset_name MNIST  --sigma_t 1.35 --lr 2.0 --batch_size 1024 --C_v=0.001 --sigma_v=0.9 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --eps=3.0
-python main.py --algorithm DPSUR --dataset_name MNIST  --sigma_t 1.35 --lr 2.0 --batch_size 1024 --C_v=0.001 --sigma_v=0.8 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --eps=4.0
-
-```
 
 #### FMNIST
 
 ```bash
-python main.py --algorithm DPSUR --dataset_name FMNIST  --sigma 4.0 --lr 4.0  --batch_size 2048 --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --input_norm=GroupNorm --num_groups=27 --use_scattering --eps=1.0
-python main.py --algorithm DPSUR --dataset_name FMNIST  --sigma 2.15 --lr 4.0 --batch_size 2048 --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --input_norm=GroupNorm --num_groups=27 --use_scattering --eps=2.0
-python main.py --algorithm DPSUR --dataset_name FMNIST  --sigma 2.15 --lr 4.0 --batch_size 2048 --C_v=0.001 --sigma_v=0.8 --bs_valid=256 --beta=-1 --input_norm=GroupNorm --num_groups=27 --use_scattering --eps=3.0
-python main.py --algorithm DPSUR --dataset_name FMNIST  --sigma 2.15 --lr 4.0 --batch_size 2048 --C_v=0.001 --sigma_v=0.8 --bs_valid=256 --beta=-1 --input_norm=GroupNorm --num_groups=27 --use_scattering --eps=4.0
+nohup python -u main.py --algorithm DPSUR --dataset_name FMNIST  --sigma_t 4.0 --lr 4.0  --batch_size 2048 --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --input_norm=GroupNorm --num_groups=27 --use_scattering --eps=1.0 > DPSUR_FMNIST_eps1.log 2>&1 &
 
+nohup python -u main.py --algorithm DPSUR --dataset_name FMNIST  --sigma_t 2.15 --lr 4.0 --batch_size 2048 --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --input_norm=GroupNorm --num_groups=27 --use_scattering --eps=2.0 > DPSUR_FMNIST_eps2.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSUR --dataset_name FMNIST  --sigma_t 2.15 --lr 4.0 --batch_size 2048 --C_v=0.001 --sigma_v=0.8 --bs_valid=256 --beta=-1 --input_norm=GroupNorm --num_groups=27 --use_scattering --eps=3.0 > DPSUR_FMNIST_eps3.log 2>&1 &
 ```
 
 #### CIFAR-10
 
 ```bash
-python main.py --algorithm DPSUR --dataset_name CIFAR-10 --sigma 11.0 --lr 4.0 --batch_size 8192 --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --eps=1.0
-python main.py --algorithm DPSUR --dataset_name CIFAR-10 --sigma 9.0  --lr 4.0 --batch_size 8192 --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --eps=2.0
-python main.py --algorithm DPSUR --dataset_name CIFAR-10 --sigma 5.67 --lr 4.0 --batch_size 8192 --C_v=0.001 --sigma_v=1.1 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --eps=3.0
-python main.py --algorithm DPSUR --dataset_name CIFAR-10 --sigma 5.67 --lr 4.0 --batch_size 8192 --C_v=0.001 --sigma_v=1.1 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --eps=4.0
+nohup python -u main.py --algorithm DPSUR --dataset_name CIFAR-10 --sigma_t 5.67 --lr 4.0 --batch_size 2048 --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --eps=1.0 > DPSUR_CIFAR_eps1.log 2>&1 &
+
+
+nohup python -u main.py --algorithm DPSUR --dataset_name CIFAR-10 --sigma_t 3.5  --lr 4.0 --batch_size 2048 --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --eps=2.0 > DPSUR_CIFAR_eps2.log 2>&1 &
+
+
+nohup python -u main.py --algorithm DPSUR --dataset_name CIFAR-10 --sigma_t 3.5 --lr 4.0 --batch_size 2048 --C_v=0.001 --sigma_v=1.1 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --eps=3.0 > DPSUR_CIFAR_eps3.log 2>&1 &
+
 
 ```
 
@@ -151,14 +118,133 @@ python main.py --algorithm DPSUR --dataset_name CIFAR-10 --sigma 5.67 --lr 4.0 -
 IMDB does not support ScatterNet models
 
 ```bash
-python main.py --algorithm DPSUR --dataset_name IMDB  --sigma 2.0 --lr 0.02  --batch_size 1024 --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --eps=1.0
-python main.py --algorithm DPSUR --dataset_name IMDB  --sigma 1.8 --lr 0.02  --batch_size 1024 --C_v=0.001 --sigma_v=1.2 --bs_valid=256 --beta=-1 --eps=2.0
-python main.py --algorithm DPSUR --dataset_name IMDB  --sigma 1.35 --lr 0.02 --batch_size 1024 --C_v=0.001 --sigma_v=1.0 --bs_valid=256 --beta=-1 --eps=3.0
-python main.py --algorithm DPSUR --dataset_name IMDB  --sigma 1.23 --lr 0.02 --batch_size 1024 --C_v=0.001 --sigma_v=0.9 --bs_valid=256 --beta=-1 --eps=4.0
+nohup python -u main.py --algorithm DPSUR --dataset_name IMDB  --sigma_t 2.0 --lr 0.02  --batch_size 512 --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --eps=1.0 > DPSUR_IMDB_eps1.log 2>&1 &
 
+nohup python -u main.py --algorithm DPSUR --dataset_name IMDB  --sigma_t 1.8 --lr 0.02  --batch_size 512 --C_v=0.001 --sigma_v=1.2 --bs_valid=256 --beta=-1 --eps=2.0 > DPSUR_IMDB_eps2.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSUR --dataset_name IMDB  --sigma_t 1.35 --lr 0.02 --batch_size 512 --C_v=0.001 --sigma_v=1.0 --bs_valid=256 --beta=-1 --eps=3.0 > DPSUR_IMDB_eps3.log 2>&1 &
+```
+
+### DPSUR_GC
+
+#### CIFAR-10
+
+```bash
+nohup python -u main.py --algorithm DPSUR_GC --dataset_name CIFAR-10 --sigma_t 5.67 --lr 0.1 --batch_size 2048 --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --soft_c=3 --max_error=11 --eps=1.0 > DPSUR_GC_CIFAR_eps1.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSUR_GC --dataset_name CIFAR-10 --sigma_t 3.5  --lr 0.1 --batch_size 2048 --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --soft_c=3 --max_error=11 --eps=2.0 > DPSUR_GC_CIFAR_eps2.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSUR_GC --dataset_name CIFAR-10 --sigma_t 3.5 --lr 0.1 --batch_size 2048 --C_v=0.001 --sigma_v=1.1 --bs_valid=256 --beta=-1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --soft_c=3 --max_error=11 --eps=3.0 > DPSUR_GC_CIFAR_eps3.log 2>&1 &
+```
+
+#### IMDB
+
+IMDB does not support ScatterNet models
+
+```bash
+nohup python -u main.py --algorithm DPSUR_GC --dataset_name IMDB  --sigma_t 2.0 --lr 0.02  --batch_size 512 --C_v=0.001 --sigma_v=1.3 --bs_valid=256 --beta=-1 --soft_c=1 --max_error=11 --eps=1.0 > DPSUR_GC_IMDB_eps1.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSUR_GC --dataset_name IMDB  --sigma_t 1.8 --lr 0.02  --batch_size 512 --C_v=0.001 --sigma_v=1.2 --bs_valid=256 --beta=-1 --soft_c=1 --max_error=11 --eps=2.0 > DPSUR_GC_IMDB_eps2.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSUR_GC --dataset_name IMDB  --sigma_t 1.35 --lr 0.02 --batch_size 512 --C_v=0.001 --sigma_v=1.0 --bs_valid=256 --beta=-1 --soft_c=1 --max_error=11 --eps=3.0 > DPSUR_GC_IMDB_eps3.log 2>&1 &
+```
+
+
+
+### DPSR-CG-woSR
+
+#### MNIST
+
+```bash
+nohup python -u main.py --algorithm DPSR-CG-woSR --dataset_name MNIST  --sigma_t 2.5 --lr 0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --soft_c=8 --max_error=11 --eps=1.0 > DPSR-CG-woSR_MNIST_eps1.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSR-CG-woSR --dataset_name MNIST  --sigma_t 1.5 --lr 0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --soft_c=8 --max_error=11 --eps=3.0 > DPSR-CG-woSR_MNIST_eps2.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSR-CG-woSR --dataset_name MNIST  --sigma_t 1.35 --lr 0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --soft_c=8 --max_error=11 --eps=3.0 > DPSR-CG-woSR_MNIST_eps3.log 2>&1 &
+
+```
+#### FMNIST
+```bash
+nohup python -u main.py --algorithm DPSR-CG-woSR --dataset_name FMNIST  --sigma_t 4.0 --lr 0.1 --batch_size 2048 --C_t=1 --input_norm=GroupNorm --num_groups=27 --use_scattering --soft_c=6 --max_error=11 --eps=3.0 > DPSR-CG-woSR_FMNIST_eps1.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSR-CG-woSR --dataset_name FMNIST  --sigma_t 2.15 --lr 0.1 --batch_size 2048 --C_t=1 --input_norm=GroupNorm --num_groups=27 --use_scattering --soft_c=6 --max_error=11 --eps=3.0 > DPSR-CG-woSR_FMNIST_eps2.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSR-CG-woSR --dataset_name FMNIST  --sigma_t 2.15 --lr 0.1 --batch_size 2048 --C_t=1 --input_norm=GroupNorm --num_groups=27 --use_scattering --soft_c=6 --max_error=11 --eps=3.0 > DPSR-CG-woSR_FMNIST_eps3.log 2>&1 &
+```
+
+
+#### CIFAR_10
+```bash
+nohup python -u main.py --algorithm DPSR-CG-woSR --dataset_name CIFAR-10 --sigma_t 5.67 --lr 0.1 --batch_size 2048 --C_t=1.0 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --soft_c=3 --max_error=11 --eps=3.0 > DPSR-CG-woSR_CIFAR_eps1.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSR-CG-woSR --dataset_name CIFAR-10 --sigma_t 3.5 --lr 0.1 --batch_size 2048 --C_t=1.0 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --soft_c=3 --max_error=11 --eps=3.0 > DPSR-CG-woSR_CIFAR_eps2.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSR-CG-woSR --dataset_name CIFAR-10 --sigma_t 3.5 --lr 0.1 --batch_size 2048 --C_t=1.0  --input_norm=BN --bn_noise_multiplier=8 --use_scattering --soft_c=3 --max_error=11 --eps=3.0 > DPSR-CG-woSR_CIFAR_eps3.log 2>&1 &
+```
+
+#### IMDB
+
+```bash
+nohup python -u main.py --algorithm DPSR-CG-woSR --dataset_name IMDB  --sigma_t 2.5 --lr 0.02 --batch_size 1024 --C_t=1.0 --soft_c=1 --max_error=11 --eps=1.0 > DPSR-CG-woSR_IMDB_eps1.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSR-CG-woSR --dataset_name IMDB  --sigma_t 1.8 --lr 0.02 --batch_size 1024 --C_t=1.0 --soft_c=1 --max_error=11 --eps=2.0 > DPSR-CG-woSR_IMDB_eps2.log 2>&1 &
+
+nohup python -u main.py --algorithm DPSR-CG-woSR --dataset_name IMDB  --sigma_t 1.35 --lr 0.02 --batch_size 1024 --C_t=1.0 --soft_c=1 --max_error=11 --eps=3.0 > DPSR-CG-woSR_IMDB_eps3.log 2>&1 &
 ```
 
 ---
+
+### DPSGD_Matrix mechanism
+
+#### MNIST
+
+```bsah 
+nohup python -u main.py --algorithm DPSGD_Matrix --dataset_name MNIST --lr=0.1 --batch_size 1024 --C_t=1  --input_norm=BN --bn_noise_multiplier=8 --use_scattering --target_epoch=20 --epsilon=1.0 > DPSGD_Matrix_MNIST_eps1.log 2>&1 &
+tail -f DPSGD_Matrix_MNIST_eps1.log
+
+nohup python -u main.py --algorithm DPSGD_Matrix --dataset_name MNIST --lr=0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --target_epoch=25 --epsilon=2.0 > DPSGD_Matrix_MNIST_eps2.log 2>&1 &
+tail -f DPSGD_Matrix_MNIST_eps2.log
+
+nohup python -u main.py --algorithm DPSGD_Matrix --dataset_name MNIST --lr=0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --target_epoch=30 --epsilon=3.0 > DPSGD_Matrix_MNIST_eps3.log 2>&1 &
+tail -f DPSGD_Matrix_MNIST_eps3.log
+```
+
+#### FMNIST
+```bsah 
+nohup python -u main.py --algorithm DPSGD_Matrix --dataset_name FMNIST --lr=0.1 --batch_size 2048 --C_t=1 --input_norm=GroupNorm --num_groups=27 --use_scattering --target_epoch=40 --epsilon=1.0 > DPSGD_Matrix_FMNIST_eps1.log 2>&1 &
+tail -f DPSGD_Matrix_FMNIST_eps1.log
+
+nohup python -u main.py --algorithm DPSGD_Matrix --dataset_name FMNIST --lr=0.1 --batch_size 2048 --C_t=1 --input_norm=GroupNorm --num_groups=27 --use_scattering --target_epoch=50 --epsilon=2.0 > DPSGD_Matrix_FMNIST_eps2.log 2>&1 &
+tail -f DPSGD_Matrix_FMNIST_eps2.log
+
+nohup python -u main.py --algorithm DPSGD_Matrix --dataset_name FMNIST --lr=0.1 --batch_size 2048 --C_t=1 --input_norm=GroupNorm --num_groups=27 --use_scattering --target_epoch=60 --epsilon=3.0 > DPSGD_Matrix_FMNIST_eps3.log 2>&1 &
+tail -f DPSGD_Matrix_FMNIST_eps3.log
+```
+
+#### CIFAR-10
+```bsah 
+nohup python -u main.py --algorithm DPSGD_Matrix --dataset_name CIFAR-10 --lr=0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --target_epoch=40 --epsilon=1.0 > DPSGD_Matrix_CIFAR_eps1.log 2>&1 &
+tail -f DPSGD_Matrix_CIFAR_eps1.log
+
+nohup python -u main.py --algorithm DPSGD_Matrix --dataset_name CIFAR-10 --lr=0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --target_epoch=50 --epsilon=2.0 > DPSGD_Matrix_CIFAR_eps2.log 2>&1 &
+tail -f DPSGD_Matrix_CIFAR_eps2.log
+
+nohup python -u main.py --algorithm DPSGD_Matrix --dataset_name CIFAR-10 --lr=0.1 --batch_size 1024 --C_t=1 --input_norm=BN --bn_noise_multiplier=8 --use_scattering --target_epoch=60 --epsilon=3.0 > DPSGD_Matrix_CIFAR_eps3.log 2>&1 &
+tail -f DPSGD_Matrix_CIFAR_eps3.log
+```
+
+
+#### IMDB
+```bsah 
+nohup python -u main.py --algorithm DPSGD_Matrix --dataset_name IMDB --lr=0.1 --batch_size 1024 --C_t=1  --target_epoch=5 --epsilon=1.0 > DPSGD_Matrix_IMDB_eps1.log 2>&1 &
+tail -f DPSGD_Matrix_IMDB_eps1.log
+
+nohup python -u main.py --algorithm DPSGD_Matrix --dataset_name IMDB --lr=0.1 --batch_size 1024 --C_t=1  --target_epoch=10 --epsilon=2.0 > DPSGD_Matrix_IMDB_eps2.log 2>&1 &
+tail -f DPSGD_Matrix_IMDB_eps2.log
+
+nohup python -u main.py --algorithm DPSGD_Matrix --dataset_name IMDB --lr=0.1 --batch_size 1024 --C_t=1  --target_epoch=15 --epsilon=3.0 > DPSGD_Matrix_IMDB_eps3.log 2>&1 &
+tail -f DPSGD_Matrix_IMDB_eps3.log
+```
 
 ## Comparison Algorithms (DPAGD)
 

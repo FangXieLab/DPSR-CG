@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/DPSER.iml" filepath="$PROJECT_DIR$/.idea/DPSER.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/DPSR-CG.iml" filepath="$PROJECT_DIR$/.idea/DPSR-CG.iml" />
     </modules>
   </component>
 </project>

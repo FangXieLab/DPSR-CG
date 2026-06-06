@@ -1,4 +1,6 @@
 import os
+
+
 os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
 import argparse
 import os
@@ -8,13 +10,16 @@ from datetime import time, datetime
 import pandas as pd
 import torch
 
+from algorithm.DPSGD_Matrix_Mechanism import DPSGD_Matrix
+
+
 from algorithm.DPAGD import DPAGD
 from algorithm.DPSGD import DPSGD
 from algorithm.DPSGD_HF import DPSGD_HF
 from algorithm.DPSGD_TS import DPSGD_TS
 from algorithm.DPSUR_GC import DPSUR_GC
-from algorithm.DPSR_CB import DPSR_CB
-from algorithm.DPIS_GC import DPIS_GC
+from algorithm.DPSR_CG import DPSR_CG
+from algorithm.DPSR_CG_woSR import DPSR_CG_woSR
 from algorithm.DPSUR import DPSUR
 from data.util.get_data import get_data
 from data.util.prepare_MIA_dataset import prepare_MIA_dataset
@@ -40,7 +45,7 @@ def main():
     parser.add_argument('--num_groups', type=int, default=27)
 
     parser.add_argument('--sigma_t', type=float, default=1.23)
-    parser.add_argument('--C_t', type=float, default=0.1)
+    parser.add_argument('--C_t', type=float, default=1)
     parser.add_argument('--epsilon', type=float, default=3.0)
     parser.add_argument('--delta', type=float, default=1e-5)
     parser.add_argument('--batch_size', type=int, default=256)
@@ -52,8 +57,10 @@ def main():
 
     parser.add_argument('--soft_c', type=int, default=8)
     parser.add_argument('--max_error', type=float, default=11)
+    parser.add_argument('--warmup_step', type=float, default=0)
+    parser.add_argument('--target_epoch', type=int, default=30)
 
-
+    
     parser.add_argument('--MIA', type=bool, default=False)
 
     parser.add_argument('--device', type=str, default='cpu',choices=['cpu', 'cuda'])
@@ -99,7 +106,7 @@ def main():
             test_acc,last_iter,best_acc,best_iter,trained_model,iter_list=DPSUR(dataset_name,target_train, target_test, target_model, batch_size, lr, momentum, epsilon,delta, C_t,
                    sigma_t,use_scattering,input_norm,bn_noise_multiplier,num_groups,bs_valid,C_v,beta,sigma_v,MIA,device)
         elif algorithm == "DPSR_CB":
-            test_acc,last_iter,best_acc,best_iter,trained_model,iter_list=DPSR_CB(dataset_name,target_train, target_test, target_model, batch_size, lr, momentum, epsilon,delta, C_t,
+            test_acc,last_iter,best_acc,best_iter,trained_model,iter_list=DPSR_CG(dataset_name,target_train, target_test, target_model, batch_size, lr, momentum, epsilon,delta, C_t,
                    sigma_t,use_scattering,input_norm,bn_noise_multiplier,num_groups,beta,MIA,device,args)
         else:
             raise ValueError("this algorithm is not exist")
@@ -131,8 +138,8 @@ def main():
                                                                                        input_norm, bn_noise_multiplier,
                                                                                        num_groups, bs_valid, C_v, beta,
                                                                                        sigma_v, MIA, device,args)
-        elif 'DPSR_CB' == algorithm:
-            test_acc, last_iter, best_acc, best_iter, trained_model, iter_list = DPSR_CB(dataset_name, train_data,
+        elif 'DPSR_CG' == algorithm:
+            test_acc, last_iter, best_acc, best_iter, trained_model, iter_list = DPSR_CG(dataset_name, train_data,
                                                                                           test_data, model, batch_size,
                                                                                           lr,
                                                                                           momentum, epsilon, delta, C_t,
@@ -142,8 +149,8 @@ def main():
                                                                                           num_groups,
                                                                                           beta, MIA, device,args)
 
-        elif 'DPIS_GC' == algorithm:
-            test_acc, last_iter, best_acc, best_iter, trained_model, iter_list = DPIS_GC(dataset_name, train_data,
+        elif 'DPSR-CG-woSR' == algorithm:
+            test_acc, last_iter, best_acc, best_iter, trained_model, iter_list = DPSR_CG_woSR(dataset_name, train_data,
                                                                                           test_data, model, batch_size,
                                                                                           lr,
                                                                                           momentum, epsilon, delta, C_t,
@@ -151,6 +158,22 @@ def main():
                                                                                           input_norm,
                                                                                           bn_noise_multiplier,
                                                                                           num_groups, MIA, device,args)
+        elif 'DPSGD_Matrix' == algorithm:
+
+            # test_acc, last_iter, best_acc, best_iter, trained_model, iter_list = DPSGD_Matrix(train_data, test_data, model,
+            # optimizer, batch_size, epsilon,
+            # delta, device, 8)
+            test_acc, last_iter, best_acc, best_iter, trained_model, iter_list = DPSGD_Matrix(dataset_name, train_data,
+                                                                                              test_data, model,
+                                                                                              optimizer, batch_size,
+                                                                                              epsilon, delta, device,
+                                                                                              args.target_epoch,
+                                                                                              beta, sigma_t,
+                                                                                              C_t, args)
+        
+            #(dataset_name, train_dataset, test_data, model, optimizer, batch_size,
+                             # epsilon_budget, delta, device, target_epochs, beta, sigma_th, C_t):
+
 
         else:
             raise ValueError("this algorithm is not exist")
@@ -184,6 +207,7 @@ def main():
 if __name__=="__main__":
 
     start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
     main()
     end_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print("start time: ", start_time)

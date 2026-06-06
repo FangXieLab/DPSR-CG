@@ -63,7 +63,7 @@ def train_with_dp_verify(model, train_loader, optimizer,device):
 
 
 
-def train_with_dp_GA(model, train_loader, optimizer,device):
+def train_with_dp_GA(model, train_loader, optimizer,device, iteration, warmup_step):
     model.train()
     train_loss = 0.0
     train_acc=0.
@@ -83,11 +83,12 @@ def train_with_dp_GA(model, train_loader, optimizer,device):
             loss.backward()
             norm = optimizer.microbatch_step_GA()
             norm_list.append(norm)
-        # optimizer.step_soft_c()
+        if iteration < warmup_step:
+            optimizer.step_soft_c()
         optimizer.step_dp()
     return train_loss, train_acc, norm_list
 
-def train_with_dp_SEGA(model, train_loader, optimizer,device):
+def train_with_dp_SEGA(model, train_loader, optimizer,device,iteration , warmup_step):
     model.train()
     train_loss = 0.0
     train_acc=0.
@@ -112,44 +113,14 @@ def train_with_dp_SEGA(model, train_loader, optimizer,device):
             norm_list.append(norm)
             total_num_e += num_e
             total_error += error
+        if iteration < warmup_step:
+            optimizer.step_soft_c()
         optimizer.step_dp_ser()
 
     return train_loss, train_acc, norm_list, total_error, total_num_e
 
 
-# def train_with_dp_SEGA_verification(model, train_loader, optimizer, device):
-#     model.train()
-#     train_loss = 0.0
-#     train_acc = 0.
-#
-#     norm_list = []
-#     bias_list = []
-#     cos_sim_list = []
-#     total_error = 0.0
-#     total_num_e = 0.0
-#     for id, (data, target) in enumerate(train_loader):
-#         data, target = data.to(device), target.to(device)
-#         optimizer.zero_accum_grad()
-#         batch_bias = 0.0
-#         for iid, (X_microbatch, y_microbatch) in enumerate(TensorDataset(data, target)):
-#             optimizer.zero_microbatch_grad()
-#
-#             output = model(torch.unsqueeze(X_microbatch, 0))
-#             if len(output.shape) == 2:
-#                 output = torch.squeeze(output, 0)
-#             loss = F.cross_entropy(output, y_microbatch)
-#             loss.backward()
-#             norm, error, num_e = optimizer.microbatch_step_SEGA_moti()
-#             norm_list.append(norm)
-#             batch_bias += error
-#             if num_e > 0:
-#                 total_num_e += 1
-#             total_error += error
-#         step_cos_sim = optimizer.step_dp_ser_moti()
-#         bias_list.append(batch_bias)
-#         cos_sim_list.append(step_cos_sim)
-#
-#     return train_loss, train_acc, norm_list, bias_list, cos_sim_list, total_error, total_num_e
+
 
 
 
@@ -232,4 +203,40 @@ def train_with_dp_agd(model, train_loader, optimizer,C_t,sigma_t,C_v,sigma_v,dev
 
 
     return train_loss, train_acc,noise_multiplier,RDP
+
+
+
+def train_with_dp_matrix(model, train_loader, optimizer, device, global_step_start,test_dl):
+
+    model.train()
+    train_loss = 0.0
+    train_acc = 0.
+    norm_list = []
+
+    global_step = global_step_start
+    # pbar = tqdm(enumerate(train_loader), total=len(train_loader), desc="Training")
+    for id, (data, target) in enumerate(train_loader):
+        data, target = data.to(device), target.to(device)
+        optimizer.zero_accum_grad()
+
+        for iid, (X_microbatch, y_microbatch) in enumerate(TensorDataset(data, target)):
+            optimizer.zero_microbatch_grad()
+            output = model(torch.unsqueeze(X_microbatch, 0))
+
+            if len(output.shape) == 2:
+                output = torch.squeeze(output, 0)
+            loss = F.cross_entropy(output, y_microbatch)
+
+            loss.backward()
+            norm = optimizer.microbatch_step()
+            norm_list.append(norm)
+
+        optimizer.step_dp_matrix(current_step=global_step)
+        global_step += 1
+
+        if id != len(train_loader) - 1:
+            test_loss, test_accuracy = validation(model, test_dl, device)
+            print(f"Test loss is {test_loss}, test accuracy is {test_accuracy}")
+    return train_loss, train_acc, norm_list, global_step
+
 

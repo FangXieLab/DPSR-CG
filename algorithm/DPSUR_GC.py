@@ -1,5 +1,5 @@
 from data.util.get_data import get_scatter_transform, get_scattered_dataset, get_scattered_loader
-from model.CNN import  CIFAR10_CNN_Tanh, MNIST_CNN_Tanh, MNIST_CNN_Cauchy_fixed
+from model.CNN import  CIFAR10_CNN_Tanh, MNIST_CNN_Tanh
 from privacy_analysis.RDP.compute_dp_sgd import apply_dp_sgd_analysis
 from privacy_analysis.RDP.compute_rdp import compute_rdp
 from privacy_analysis.RDP.get_MaxSigma_or_MaxSteps import get_max_steps, get_min_sigma
@@ -17,7 +17,21 @@ from data.util.sampling import  get_data_loaders_possion
 
 from data.util.dividing_validation_data import dividing_validation_set, dividing_validation_set_for_IMDB
 import os
+from scipy.stats import norm
 
+def calculate_exact_rho(C_max, Delta, sigma_v):
+
+    z_num = (C_max - Delta) / sigma_v
+    z_den = C_max / sigma_v
+
+    prob_with_z = norm.sf(z_num)
+    prob_without_z = norm.sf(z_den)
+
+    rho_max = prob_with_z / prob_without_z
+
+
+
+    return rho_max
 
 def DPSUR_GC(dataset_name,train_dataset, test_data, model, batch_size, lr, momentum, epsilon_budget,delta, C_t, sigma_t,use_scattering,input_norm,bn_noise_multiplier,num_groups,bs_valid,C_v,beta,sigma_v,MIA,device,args):
 
@@ -27,6 +41,10 @@ def DPSUR_GC(dataset_name,train_dataset, test_data, model, batch_size, lr, momen
         test_data, batch_size=batch_size, shuffle=False, pin_memory=True)
     rdp_norm = 0.
 
+        
+    q_real_ratio = calculate_exact_rho(C_v, 2*C_v, 2*C_v*sigma_v)
+    print(f"currrent batch size is {batch_size} and q_real_ratio is {q_real_ratio}")
+    
     #if MIA==True, Do not using scatter
     if MIA:
         train_data = train_dataset
@@ -128,8 +146,9 @@ def DPSUR_GC(dataset_name,train_dataset, test_data, model, batch_size, lr, momen
     while epsilon<epsilon_budget:
 
         if dataset_name=='IMDB':
-            rdp_train = compute_rdp(batch_size / len(train_dataset), sigma_t, t, orders)
-            rdp_valid = compute_rdp(bs_valid / len(train_dataset), sigma_v, t, orders)
+            rdp_train = compute_rdp(batch_size / len(train_dataset)* q_real_ratio, sigma_t, t, orders)
+            # rdp_valid = compute_rdp(bs_valid / len(train_dataset)* q_real_ratio, sigma_v, t, orders)
+            rdp_valid = 0
             epsilon, best_alpha = compute_eps(orders, rdp_train + rdp_valid, delta)
 
             train_dl = minibatch_loader_for_train(train_dataset)
@@ -139,14 +158,14 @@ def DPSUR_GC(dataset_name,train_dataset, test_data, model, batch_size, lr, momen
 
         else:
             if input_norm == "BN":
-                rdp_train = compute_rdp(batch_size / len(train_dataset), sigma_t, t, orders)
-                rdp_valid = compute_rdp(bs_valid / len(train_dataset), sigma_v, t, orders)
+                rdp_train = compute_rdp(batch_size / len(train_dataset) * q_real_ratio, sigma_t, t, orders)
+                rdp_valid = 0 #compute_rdp(bs_valid / len(train_dataset) * q_real_ratio, sigma_v, t, orders)
 
                 epsilon, best_alpha = compute_eps(orders, rdp_train + rdp_valid+ rdp_norm, delta)
 
             else:
-                rdp_train = compute_rdp(batch_size / len(train_dataset), sigma_t, t, orders)
-                rdp_valid = compute_rdp(bs_valid / len(train_dataset), sigma_v, t, orders)
+                rdp_train = compute_rdp(batch_size / len(train_dataset) * q_real_ratio, sigma_t, t, orders)
+                rdp_valid = 0  #compute_rdp(bs_valid / len(train_dataset), sigma_v, t, orders)
                 epsilon, best_alpha = compute_eps(orders, rdp_train+rdp_valid, delta)
 
             train_dl = minibatch_loader_for_train(train_data)
@@ -154,7 +173,7 @@ def DPSUR_GC(dataset_name,train_dataset, test_data, model, batch_size, lr, momen
             for id, (data, target) in enumerate(train_dl):
                 optimizer.minibatch_size = len(data)
 
-        train_loss, train_accuracy,norm_list = train_with_dp_GA(model, train_dl, optimizer,device)
+        train_loss, train_accuracy,norm_list = train_with_dp_GA(model, train_dl, optimizer,device, t, args.warmup_step)
 
         valid_loss, valid_accuracy = validation(model, valid_dl,device)
 
@@ -202,9 +221,4 @@ CNNS = {
     "FMNIST": MNIST_CNN_Tanh,
     "MNIST": MNIST_CNN_Tanh,
 
-}
-CNNS_x = {
-    "CIFAR-10": CIFAR10_CNN_Tanh,
-    "FMNIST": MNIST_CNN_Cauchy_fixed,
-    "MNIST": MNIST_CNN_Cauchy_fixed,
 }

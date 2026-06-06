@@ -8,7 +8,7 @@ from privacy_analysis.dp_utils import scatter_normalization
 from utils.dp_optimizer import DPSGD_Optimizer, DPAdam_Optimizer
 import torch
 
-from train_and_validation.train_with_dp import   train_with_dp
+from train_and_validation.train_with_dp import   train_with_dp,train_with_dp_GA
 from train_and_validation.validation import validation
 import copy
 import numpy as np
@@ -17,29 +17,10 @@ from data.util.sampling import  get_data_loaders_possion
 
 from data.util.dividing_validation_data import dividing_validation_set, dividing_validation_set_for_IMDB
 import os
-from scipy.stats import norm
-
-def calculate_exact_rho(C_max, Delta, sigma_v):
-
-    z_num = (C_max - Delta) / sigma_v
-    z_den = C_max / sigma_v
-
-    prob_with_z = norm.sf(z_num)
-    prob_without_z = norm.sf(z_den)
-
-    rho_max = prob_with_z / prob_without_z
 
 
+def DPSR_CG_woSR(dataset_name,train_dataset, test_data, model, batch_size, lr, momentum, epsilon_budget,delta, C_t, sigma_t,use_scattering,input_norm,bn_noise_multiplier,num_groups,MIA,device,args):
 
-    return rho_max
-
-def DPSUR(dataset_name,train_dataset, test_data, model, batch_size, lr, momentum, epsilon_budget,delta, C_t, sigma_t,use_scattering,input_norm,bn_noise_multiplier,num_groups,bs_valid,C_v,beta,sigma_v,MIA,device):
-
-
-
-    q_real_ratio = calculate_exact_rho(C_v, 2*C_v, 2*C_v*sigma_v)
-
-    print(f"currrent batch size is {batch_size} and q_real_ratio is {q_real_ratio}")
     orders = [1 + x / 10.0 for x in range(1, 100)] + list(range(11, 64))+ [128, 256, 512]
 
     test_dl = torch.utils.data.DataLoader(
@@ -47,16 +28,17 @@ def DPSUR(dataset_name,train_dataset, test_data, model, batch_size, lr, momentum
     rdp_norm = 0.
 
     #if MIA==True, Do not using scatter
+
     if MIA:
-        train_data=train_dataset
+        train_data = train_dataset
         if dataset_name != 'IMDB':
             optimizer = DPSGD_Optimizer(
                 l2_norm_clip=C_t,
                 noise_multiplier=sigma_t,
                 minibatch_size=batch_size,
                 microbatch_size=1,
-                soft_c=1,
-                max_error=1,
+                soft_c=args.soft_c,
+                max_error=args.max_error,
                 params=model.parameters(),
                 lr=lr,
                 momentum=momentum
@@ -67,8 +49,8 @@ def DPSUR(dataset_name,train_dataset, test_data, model, batch_size, lr, momentum
                 noise_multiplier=sigma_t,
                 minibatch_size=batch_size,
                 microbatch_size=1,
-                soft_c=1,
-                max_error=1,
+                soft_c=args.soft_c,
+                max_error=args.max_error,
                 params=model.parameters(),
                 lr=lr)
     else:
@@ -113,8 +95,8 @@ def DPSUR(dataset_name,train_dataset, test_data, model, batch_size, lr, momentum
                 noise_multiplier=sigma_t,
                 minibatch_size=batch_size,
                 microbatch_size=1,
-                soft_c=1,
-                max_error=1,
+                soft_c=args.soft_c,
+                max_error=args.max_error,
                 params=model.parameters(),
                 lr=lr,
                 momentum=momentum
@@ -125,13 +107,13 @@ def DPSUR(dataset_name,train_dataset, test_data, model, batch_size, lr, momentum
                 noise_multiplier=sigma_t,
                 minibatch_size=batch_size,
                 microbatch_size=1,
-                soft_c=1,
-                max_error=1,
+                soft_c=args.soft_c,
+                max_error=args.max_error,
                 params=model.parameters(),
                 lr=lr)
 
     minibatch_loader_for_train, microbatch_loader = get_data_loaders_possion(minibatch_size=batch_size, microbatch_size=1, iterations=1)
-    minibatch_loader_for_valid, microbatch_loader = get_data_loaders_possion(minibatch_size=bs_valid, microbatch_size=1, iterations=1)
+    # minibatch_loader_for_valid, microbatch_loader = get_data_loaders_possion(minibatch_size=bs_valid, microbatch_size=1, iterations=1)
 
     last_valid_loss = 100000.0
     last_accept_test_acc=0.
@@ -147,72 +129,52 @@ def DPSUR(dataset_name,train_dataset, test_data, model, batch_size, lr, momentum
     while epsilon<epsilon_budget:
 
         if dataset_name=='IMDB':
-            rdp_train = compute_rdp(batch_size / len(train_dataset) * q_real_ratio, sigma_t, t, orders)
-            # rdp_valid = compute_rdp(bs_valid / len(train_dataset) * q_real_ratio, sigma_v, t, orders)
-            rdp_valid = 0
-            epsilon, best_alpha = compute_eps(orders, rdp_train + rdp_valid, delta)
+            rdp_train = compute_rdp(batch_size / len(train_dataset), sigma_t, t, orders)
+            # rdp_valid = compute_rdp(bs_valid / len(train_dataset), sigma_v, t, orders)
+            epsilon, best_alpha = compute_eps(orders, rdp_train , delta)
 
             train_dl = minibatch_loader_for_train(train_dataset)
-            valid_dl = minibatch_loader_for_valid(train_dataset)
+            # valid_dl = minibatch_loader_for_valid(train_dataset)
             for id, (data, target) in enumerate(train_dl):
                 optimizer.minibatch_size = len(data)
 
         else:
             if input_norm == "BN":
-                rdp_train = compute_rdp(batch_size / len(train_dataset) * q_real_ratio, sigma_t, t, orders)
-                # rdp_valid = compute_rdp(bs_valid / len(train_dataset) * q_real_ratio, sigma_v, t, orders)
-                rdp_valid = 0
-                epsilon, best_alpha = compute_eps(orders, rdp_train + rdp_valid+ rdp_norm, delta)
+                rdp_train = compute_rdp(batch_size / len(train_dataset), sigma_t, t, orders)
+
+
+                epsilon, best_alpha = compute_eps(orders, rdp_train + rdp_norm, delta)
 
             else:
-                rdp_train = compute_rdp(batch_size / len(train_dataset) * q_real_ratio, sigma_t, t, orders)
-                # rdp_valid = compute_rdp(bs_valid / len(train_dataset) * q_real_ratio, sigma_v, t, orders)
-                rdp_valid = 0
-                epsilon, best_alpha = compute_eps(orders, rdp_train+rdp_valid, delta)
+                rdp_train = compute_rdp(batch_size / len(train_dataset), sigma_t, t, orders)
+
+                epsilon, best_alpha = compute_eps(orders, rdp_train, delta)
 
             train_dl = minibatch_loader_for_train(train_data)
-            valid_dl = minibatch_loader_for_valid(train_data)
+            # valid_dl = minibatch_loader_for_valid(train_data)
             for id, (data, target) in enumerate(train_dl):
                 optimizer.minibatch_size = len(data)
 
-        train_loss, train_accuracy,norm_list = train_with_dp(model, train_dl, optimizer,device)
+        train_loss, train_accuracy,norm_list = train_with_dp_GA(model, train_dl, optimizer,device, t, args.warmup_step)
 
-        valid_loss, valid_accuracy = validation(model, valid_dl,device)
+        # valid_loss, valid_accuracy = validation(model, valid_dl,device)
 
         test_loss, test_accuracy = validation(model, test_dl,device)
 
+        t = t + 1
 
-        deltaE=valid_loss - last_valid_loss
-        deltaE=torch.tensor(deltaE).cpu()
-        print("Delta E:",deltaE)
+        last_accept_test_acc=test_accuracy
 
-        deltaE= np.clip(deltaE,-C_v,C_v)
-        deltaE_after_dp = 2*C_v*sigma_v*np.random.normal(0,1)+deltaE
+        if last_accept_test_acc > best_test_acc:
+            best_test_acc = last_accept_test_acc
+            best_iter = t
 
-        print("Delta E after dp:",deltaE_after_dp)
-
-        if deltaE_after_dp < beta*C_v:
-            last_valid_loss = valid_loss
-            last_model = copy.deepcopy(model)
-            t = t + 1
-            print("accept updates，the number of updates t：", format(t))
-            last_accept_test_acc=test_accuracy
-
-            if last_accept_test_acc > best_test_acc:
-                best_test_acc = last_accept_test_acc
-                best_iter = t
-
-            epsilon_list.append(torch.tensor(epsilon))
-            test_loss_list.append(test_loss)
-
-        else:
-            print("reject updates")
-            model.load_state_dict(last_model.state_dict(), strict=True)
+        epsilon_list.append(torch.tensor(epsilon))
+        test_loss_list.append(test_loss)
 
         print(
-            f'iters:{iter},'f'epsilon:{epsilon:.4f} |'f' Test set: Average loss: {test_loss:.4f},'f' Accuracy:({test_accuracy:.2f}%), gradient norm is {sum(norm_list) / batch_size:.2f}, current clip is {optimizer.l2_norm_clip}')
+            f'iters:{t},'f'epsilon:{epsilon:.4f} |'f' Test set: Average loss: {test_loss:.4f},'f' Accuracy:({test_accuracy:.2f}%), gradient norm is {sum(norm_list) / batch_size:.2f}, current clip is {optimizer.l2_norm_clip,optimizer.soft_c}')
 
-        iter+=1
 
 
     print("------ finished ------")
@@ -222,4 +184,5 @@ CNNS = {
     "CIFAR-10": CIFAR10_CNN_Tanh,
     "FMNIST": MNIST_CNN_Tanh,
     "MNIST": MNIST_CNN_Tanh,
+
 }
